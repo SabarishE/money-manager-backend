@@ -33,7 +33,7 @@ router.delete("/:id",async(req,res)=>{
   
     const data = await Tracker.findById(id);
     await data.remove();
-    res.send({...data,message:"data is deleted"});
+    res.send({message:"data is deleted"});
     console.log("data with above ID is deleted");
     }
    catch(err)
