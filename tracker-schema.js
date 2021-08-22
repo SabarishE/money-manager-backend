@@ -6,7 +6,7 @@ const trackerschema= new mongoose.Schema({
     division:{type:String},
     category:{type:String},
     amount: {type:Number},
-    date: {type:String}
+    date: {type:date}
     
 })
 
