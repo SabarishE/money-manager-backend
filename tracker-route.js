@@ -17,7 +17,15 @@ router.post("/",async(req,res)=>{
     const adddata=req.body ;
     console.log(adddata);
   
-   const newdata = new Tracker(adddata);
+   const newdata = new Tracker({
+
+    type:adddata.type,
+    division:adddata.division,
+    category:adddata.category,
+    amount:adddata.amount,
+    date:new Date(adddata.date)
+
+   });
 
     const newaddition =await newdata.save();
     res.send(newaddition);
