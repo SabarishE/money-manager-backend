@@ -2,11 +2,20 @@ import mongoose from "mongoose";
 
 const trackerschema= new mongoose.Schema({
 
-    type: {type:String},
-    division:{type:String},
-    category:{type:String},
-    amount: {type:Number},
-    date: {type:Date}
+    name:{type:String,required:true},
+    email:{type:String,required:true},
+    passwordHash:{type:String},
+tempString:{type:String},
+    box:[
+{
+            type: {type:String},
+            division:{type:String},
+            category:{type:String},
+            amount: {type:Number},
+            date: {type:Date,default: Date.now,}
+}
+    ]
+    
     
 })
 

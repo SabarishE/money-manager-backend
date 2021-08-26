@@ -1,62 +1,123 @@
 import express from "express";
 
 import {Tracker} from "./tracker-schema.js";
+import { auth } from "./auth.js";
+
+import bcrypt from "bcryptjs";
 
 const router =express.Router();
 
-// -------adding a new document------- 
+// -------signup of a new user------- 
 
-router.post("/",async(req,res)=>{
+router.post("/signup",async(req,res)=>{
 
-    const adddata=req.body ;
-    console.log(adddata);
+    try{
+    const adduser=req.body ;
+  console.log("signup alert!!!",adduser);
+    const salt=await bcrypt.genSalt(10);
+
+    const passwordHash =await bcrypt.hash(adduser.password,salt);
   
-   
-   const newdata = new Tracker({
+    console.log("After new SIGNUP >>>","\n",adduser);
+    console.log(`passoword hash for the password'${adduser.password}'is >>> ${passwordHash}`)
+    const newuser = new Tracker({
 
-    type:adddata.type,
-    division:adddata.division,
-    category:adddata.category,
-    amount:adddata.amount,
-    date:new Date(adddata.date)
+    name:adduser.name,
+    email:adduser.email,
+    passwordHash
 
    });
 
-    const newaddition =await newdata.save();
+    const newaddition =await newuser.save();
     res.send(newaddition);
+
+}
+catch(err){
+    res.send(err);
+    console.log("error in signup!!!",err)
+}
+})
+
+// -------adding a new entry-------
+
+
+router.patch("/newentry/:email",async(req,res)=>{
+
+    Tracker.findOneAndUpdate(
+        {email:req.params.email}, 
+         {$push: {box :{
+            type: req.body.type,
+            division:req.body.division,
+            category:req.body.category,
+            amount: req.body.amount,
+            date: new Date(req.body.date)
+         }}}
+     ,{new: true}
+         )
+     
+     .then((m) => {
+         if (!m) {
+            console.log("error in patch");
+             return res.status(404).send();
+             
+         }
+         else{
+             res.send(m);
+             console.log("new entry added to box >>>",m)
+         }
+         
+     }).catch((error) => {
+         res.status(500).send({error});
+         console.log("error in adding new entry to box !!!",error)
+     })
+})
+
+
+// -------login of a user------- 
+
+router.post("/login",async(req,res)=>{
+
+    try{
+ 
+        const userLoggingIn= await Tracker.find({email:req.body.email});
+     
+        const isMatch=await bcrypt.compare(Input.password,userLoggingIn[0].passwordHash);
+        if(!isMatch)
+        {
+          res.status(500);
+          res.send({message:"---- invalid credentials----"});
+          console.log("---- invalid credentials----");
+         
+
+        }
+        else
+        {
+          const token=jwt.sign({id:userLoggingIn[0]._id},"mysecretkey");
+           
+         res.send({loggeduser:userLoggingIn[0],message:"login success !!!",token});
+          console.log("---- successful login----");
+        }
+      
+      }
+      
+      catch(err)
+      {
+        res.status(500);
+        res.send(err);
+        console.log("Error in finding the user!!!");
+      }
 
 })
 
-// -------deleting a document-------
-
-router.delete("/:id",async(req,res)=>{
-
-    const { id }= req.params;
-    console.log(id);
-  
-    try {
-  
-    const data = await Tracker.findById(id);
-    await data.remove();
-    res.send({message:"data is deleted"});
-    console.log("data with above ID is deleted");
-    }
-   catch(err)
-   {
-     res.status(500);
-     res.send("data not found in trackerDB");
-     console.log("err: user not found");
-   }
-  
-  })
+// -------forgot password------- 
 
 // -------getting all documents------- 
 
-router.get("/",async(req,res)=>{
+router.get(auth,"/user/:email",async(req,res)=>{
 
-    const  data= await Tracker.find();
-    console.log(data);
-    res.send(data);
+    const  data= await Tracker.find({email:req.params.email});
+    console.log(data[0]);
+    res.send(data[0]);
     
 })
 
