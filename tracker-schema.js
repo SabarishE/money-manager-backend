@@ -12,6 +12,7 @@ tempString:{type:String},
             division:{type:String},
             category:{type:String},
             amount: {type:Number},
+            description:{type:String},
             date: {type:Date,default: Date.now,}
 }
     ]

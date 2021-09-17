@@ -4,6 +4,7 @@ import {Tracker} from "./tracker-schema.js";
 import { auth } from "./auth.js";
 
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken"
 
 const router =express.Router();
 
@@ -13,13 +14,17 @@ router.post("/signup",async(req,res)=>{
 
     try{
     const adduser=req.body ;
-  console.log("signup alert!!!",adduser);
-    const salt=await bcrypt.genSalt(10);
+   console.log("signup alert!!!",adduser);
 
+   let emailcheck =await Tracker.find({email:adduser.email});
+   if(emailcheck) {
+       return res.status(400).send({msg:"User exists"})
+   }
+    const salt=await bcrypt.genSalt(10);
     const passwordHash =await bcrypt.hash(adduser.password,salt);
   
     console.log("After new SIGNUP >>>","\n",adduser);
-    console.log(`passoword hash for the password'${adduser.password}'is >>> ${passwordHash}`)
+    console.log(`password hash for the password'${adduser.password}'is >>> ${passwordHash}`)
     const newuser = new Tracker({
 
     name:adduser.name,
@@ -43,6 +48,7 @@ catch(err){
 
 router.patch("/newentry/:email",async(req,res)=>{
 
+    console.log("params test >>>",req.params.email)
     Tracker.findOneAndUpdate(
         {email:req.params.email}, 
          {$push: {box :{
@@ -78,25 +84,25 @@ router.patch("/newentry/:email",async(req,res)=>{
 router.post("/login",async(req,res)=>{
 
     try{
- 
-        const userLoggingIn= await Tracker.find({email:req.body.email});
+        console.log("login alert !!!")
+        const userLoggingIn= await Tracker.findOne({email:req.body.email});
      
-        const isMatch=await bcrypt.compare(Input.password,userLoggingIn[0].passwordHash);
+        if(!userLoggingIn){
+            return res.status(400).send({msg:"invalid credentials"});
+        }
+        const isMatch=await bcrypt.compare(req.body.password,userLoggingIn.passwordHash);
+
+       
         if(!isMatch)
         {
-          res.status(500);
-          res.send({message:"---- invalid credentials----"});
-          console.log("---- invalid credentials----");
-         
-
+            res.status(500);
+            res.send({message:"invalid credentials"});
+            console.log("---- invalid credentials----");
         }
-        else
-        {
-          const token=jwt.sign({id:userLoggingIn[0]._id},"mysecretkey");
-           
-         res.send({loggeduser:userLoggingIn[0],message:"login success !!!",token});
-          console.log("---- successful login----");
-        }
+        const token=jwt.sign({id:userLoggingIn.id,email:userLoggingIn.email},"mysecretkey");
+        // res.header("x-auth-token",token);
+        res.send({loggeduser:userLoggingIn,token,message:"login success"});
+        console.log("---- successful login----");
       
       }
       
@@ -104,7 +110,7 @@ router.post("/login",async(req,res)=>{
       {
         res.status(500);
         res.send(err);
-        console.log("Error in finding the user!!!");
+        console.log("Error in finding the user!!!",err);
       }
 
 })
@@ -113,25 +119,91 @@ router.post("/login",async(req,res)=>{
 
 // -------getting all documents------- 
 
-router.get(auth,"/user/:email",async(req,res)=>{
-
-    const  data= await Tracker.find({email:req.params.email});
-    console.log(data[0]);
-    res.send(data[0]);
-    
+router.get("/user/:email",auth,async(req,res)=>{
+    try{
+        const  data= await Tracker.findOne({email:req.params.email});
+        console.log("user details >>>",req.params.email);
+        res.send(data);
+    }
+    catch(err){
+        res.send({message:"error in finding the user",err
+    })
+        console.log("error in finding the user")
+    }
 })
 
 //-----filtering of documents-------- 
 
 //-----based on a year-------- 
 
-router.get("/filter/byyear/:year",async(req,res)=>{
+router.get("/:email/filter/byyear/:year",async(req,res)=>{
 
     try{
 
-        const  data= await Tracker.find({ $expr: {
+        // const  data= await Tracker.find({ $expr: {
+        //     $eq: [{ $year: "$date" },+req.params.year]
+        //     }})
+        const  data= await Tracker.find({
+            box:{$expr: {
             $eq: [{ $year: "$date" },+req.params.year]
-            }})
+            }},email:req.params.email
+                   })
+
+
+
+        // const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
+        //     {$unwind:"$box" }, 
+        //     {$match: {$expr: {
+        //     $eq: [{ $year: "$date" },+req.params.year]
+        //     }}}
+
+
+//         const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
+//             {$unwind:"$box" }, 
+//             {$project: {box: { $filter: {
+//           input: "$box",
+//           as: "item",
+//           cond: { $eq: [{ $year: "$date"},+req.params.year ]}
+//                                        }
+//                              }
+//                        }
+//             }
+//   ]);
+
+
+
+    //         { $project: {
+    //      box: {
+    //         $filter: {
+    //            input: "$box",
+    //            as: "item",
+    //            cond: {$eq: [{ $year: "$date" },+req.params.year]  }
+    //         }
+    //      }
+    //   }
+    //     }
+        // ]);
+
+
+
+        // const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
+        //     {$unwind:"$box" }, 
+        //     {$match:{"box.date":{$eq: [{ $year: "$date" },+req.params.year] }}}
+        // ]);
+
+
+
+    //    const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
+    //     {$unwind:"$box" }, 
+    //     {$eq: [{ $year: "$date" },+req.params.year] }]);
+//  const  data= await Tracker.aggregate([{email:req.params.email},
+//  { $unwind: "$box" },
+//             {$expr: {
+//             $eq: [{ $year: "$date" },+req.params.year]
+//             }}
+//         ])
+
+       
         // const  data= await Tracker.find({ "$where": this.date.getFullYear() === req.params.year)} });
         console.log(data, req.params.year);
         res.send(data);
