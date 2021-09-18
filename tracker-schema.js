@@ -6,6 +6,7 @@ const trackerschema= new mongoose.Schema({
     email:{type:String,required:true},
     passwordHash:{type:String},
 tempString:{type:String},
+admin:{type:Boolean,default:false},
     box:[
 {
             type: {type:String},
