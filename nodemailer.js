@@ -8,7 +8,7 @@ const client_secret="cxlJsDxELESfrVCyf0BLtk5j";
 const redirect_uri="https://developers.google.com/oauthplayground";
 const refresh_token="1//04NsAiGObAXJyCgYIARAAGAQSNwF-L9IrwdAN8iFNGNG1w1LCNcrmpEBk3V9kDz8xDP3oW9UsgCRD9Q0nuOtL3y7Kc4FqOhh_xjA";
 
-const oAuth2Client= new google.auth.Oauth2(client_id,client_secret,redirect_uri)
+const oAuth2Client= new google.auth.OAuth2(client_id,client_secret,redirect_uri)
 
 oAuth2Client.setCredentials({refresh_token:refresh_token})
 
