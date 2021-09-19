@@ -4,13 +4,13 @@ import {google} from "googleapis"
 
 
 const client_id="543519367783-8rthmcbg05l5ue049mstkmb3qjjugk7e.apps.googleusercontent.com";
-const client_secret="cxlJsDxELESfrVCyf0BLtk5j";
+const client_secret=process.env.secret ||"cxlJsDxELESfrVCyf0BLtk5j";
 const redirect_uri="https://developers.google.com/oauthplayground";
-const refresh_token="1//04PhludIcav9LCgYIARAAGAQSNwF-L9IrfRNYEA-156yGy6ScZNkVPZ4JpNsnkK45hFaB8lhgn8wr-FsBr-7SHjjt0Tc8I7QZdVM";
+const refresh_token="1//04OLvrV3nPZATCgYIARAAGAQSNwF-L9IrZrYvlSliGMZCng3unBYjlF2BYPOcxCjfm8IGLcPVoVfvFvPdQOZWUOvEb7dD4bEYiG4";
 
 const oAuth2Client= new google.auth.OAuth2(client_id,client_secret,redirect_uri)
 
-oAuth2Client.setCredentials({refresh_token:refresh_token})
+oAuth2Client.setCredentials({refresh_token:refresh_token});
 
 const access_token= oAuth2Client.getAccessToken();
 
@@ -23,5 +23,8 @@ export var transporter = nodemailer.createTransport({
     clientSecret:client_secret,
     refreshToken:refresh_token,
     accessToken:access_token
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });

@@ -18,7 +18,7 @@ router.post("/signup",async(req,res)=>{
 
    let emailcheck =await Tracker.findOne({email:adduser.email});
    if(emailcheck) {
-       return res.status(400).send({msg:"User exists"})
+       return res.status(400).send({msg:"invalid"})
    }
     const salt=await bcrypt.genSalt(10);
     const passwordHash =await bcrypt.hash(adduser.password,salt);
@@ -65,7 +65,7 @@ router.post("/login",async(req,res)=>{
         const userLoggingIn= await Tracker.findOne({email:req.body.email});
      
         if(!userLoggingIn){
-            return res.status(400).send({msg:"invalid credentials"});
+            return res.status(400).send({msg:"invalid"});
         }
         const isMatch=await bcrypt.compare(req.body.password,userLoggingIn.passwordHash);
 
@@ -113,7 +113,8 @@ router.patch("/newentry/:email",auth,async(req,res)=>{
      .then((m) => {
          if (!m) {
             console.log("error in patch");
-             return res.status(404).send();
+            res.send({msg:"invalid"});
+             return res.status(404);
              
          }
          else{
@@ -204,9 +205,6 @@ router.get("/admin/:email",auth,async(req,res)=>{
 
 // --------------Password Reset Flow Starts------------
 
-
-
-
 // ------sending one time link to user's mail to change password -----
 
 router.post("/forgotpwd",async(req,res)=>{
@@ -243,8 +241,8 @@ const secretKey= pwdrequester.passwordHash;
       var mailOptions = {
         from: 'one.trial.one.trial@gmail.com',
         to:pwdrequester.email ,
-        subject: 'reset password mail',
-        text: link
+        subject: 'Password reset link from Bill Box',
+        html:`<h3>Verification Link from Bill Box</h3><p>${link}</p>`
       };
   
       transporter.sendMail(mailOptions, function(error, info){
@@ -267,7 +265,7 @@ const secretKey= pwdrequester.passwordHash;
   
   });
   
-  
+//   --------verifying the token received-------
   
   router.get("/resetpwd/:email/:token",async(req,res)=>{
 
@@ -292,7 +290,6 @@ const secretKey= pwdrequester.passwordHash;
     });
 
 });
-  
   
   //---------- new password post and update -----------
   
@@ -329,195 +326,3 @@ const secretKey= pwdrequester.passwordHash;
 
 
   export default router;
-
-
-
-
-
-
-//-----filtering of documents-------- 
-
-//-----based on a year-------- 
-
-// router.get("/:email/filter/byyear/:year",async(req,res)=>{
-
-//     try{
-
-//         // const  data= await Tracker.find({ $expr: {
-//         //     $eq: [{ $year: "$date" },+req.params.year]
-//         //     }})
-//         const  data= await Tracker.find({
-//             box:{$expr: {
-//             $eq: [{ $year: "$date" },+req.params.year]
-//             }},email:req.params.email
-//                    })
-
-
-
-        // const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
-        //     {$unwind:"$box" }, 
-        //     {$match: {$expr: {
-        //     $eq: [{ $year: "$date" },+req.params.year]
-        //     }}}
-
-
-//         const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
-//             {$unwind:"$box" }, 
-//             {$project: {box: { $filter: {
-//           input: "$box",
-//           as: "item",
-//           cond: { $eq: [{ $year: "$date"},+req.params.year ]}
-//                                        }
-//                              }
-//                        }
-//             }
-//   ]);
-
-
-
-    //         { $project: {
-    //      box: {
-    //         $filter: {
-    //            input: "$box",
-    //            as: "item",
-    //            cond: {$eq: [{ $year: "$date" },+req.params.year]  }
-    //         }
-    //      }
-    //   }
-    //     }
-        // ]);
-
-
-
-        // const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
-        //     {$unwind:"$box" }, 
-        //     {$match:{"box.date":{$eq: [{ $year: "$date" },+req.params.year] }}}
-        // ]);
-
-
-
-    //    const  data= await Tracker.aggregate([{$match:{email:req.params.email}},
-    //     {$unwind:"$box" }, 
-    //     {$eq: [{ $year: "$date" },+req.params.year] }]);
-//  const  data= await Tracker.aggregate([{email:req.params.email},
-//  { $unwind: "$box" },
-//             {$expr: {
-//             $eq: [{ $year: "$date" },+req.params.year]
-//             }}
-//         ])
-
-       
-        // const  data= await Tracker.find({ "$where": this.date.getFullYear() === req.params.year)} });
-//         console.log(data, req.params.year);
-//         res.send(data);
-//     }
-//     catch(err){
-        
-//             res.status(500);
-//             res.send({msg:"error in finding by year",error:err});
-//             console.log("err: data not found for the year",req.params.year );
-//     }
-// })
-
-//-------between 2 dates-------- 
-
-// router.get("/filter/between2dates/:from/:to",async(req,res)=>{
-
-//     try{
-
-//         const  data= await Tracker.find({ date: {
-//             $gte:new Date(req.params.from) ,
-//             $lte:new Date(req.params.to)
-//             }})
-//         // const  data= await Tracker.find({ "$where": this.date.getFullYear() === req.params.year)} });
-//         console.log("data successfully found between 2 given dates",data);
-//         res.send(data);
-//     }
-//     catch(err){
-        
-//             res.status(500);
-//             res.send({msg:"error in finding by year",error:err});
-//             console.log("err: data not found between 2 years");
-//     }
-// })
-
-//-----based on a month of given year-------- 
-
-// router.get("/filter/bymonth/:year/:month",async(req,res)=>{
-
-//     try{
-
-//         const  data= await Tracker.find({$and:[ {$expr: {
-//             $eq: [{ $year: "$date" },+req.params.year]
-//             }},
-//             {$expr: {
-//                 $eq: [{ $month: "$date" },+req.params.month]
-//                 }}
-//         ]})
-//         // const  data= await Tracker.find({ "$where": this.date.getFullYear() === req.params.year)} });
-//         console.log("data successfully found for given month of year");
-//         res.send(data);
-//     }
-//     catch(err){
-        
-//             res.status(500);
-//             res.send({msg:"error in finding by month",error:err});
-//             console.log("err: data not found for the given month of >>>",req.params.year );
-//     }
-// })  
-
-// ------- based on type---------
-
-// router.get("/filter/bytype/:type",async(req,res)=>{
-
-//     try{
-
-//         const  data= await Tracker.find({type:req.params.type})
-//         console.log("data successfully found for given type");
-//         res.send(data);
-//     }
-//     catch(err){
-        
-//             res.status(500);
-//             res.send({msg:"error in finding by type",error:err});
-//             console.log("err: data not found for the given type >>>",req.params.type );
-//         }
-//   })
-
-// ------- based on division---------
-
-// router.get("/filter/bydivision/:division",async(req,res)=>{
-
-//     try{
-
-//         const  data= await Tracker.find({division:req.params.division})
-//         console.log("data successfully found for given division");
-//         res.send(data);
-//     }
-//     catch(err){
-        
-//             res.status(500);
-//             res.send({msg:"error in finding by division",error:err});
-//             console.log("err: data not found for the given division >>>",req.params.division );
-//     }
-// })
-
-
-// ------- based on category---------
-
-// router.get("/filter/bycategory/:category",async(req,res)=>{
-
-//     try{
-
-//         const  data= await Tracker.find({category:req.params.category})
-//         console.log("data successfully found for given category");
-//         res.send(data);
-//     }
-//     catch(err){
-        
-//             res.status(500);
-//             res.send({msg:"error in finding by category",error:err});
-//             console.log("err: data not found for the given category >>>",req.params.category );
-//     }
-// })
-
