@@ -142,6 +142,38 @@ router.get("/user/:email",auth,async(req,res)=>{
     }
 })
 
+// -----------deleting an item in box------------
+
+router.patch("/delete/:email/:itemid",auth,async(req,res)=>{
+
+    console.log("delete alert !!!")
+
+
+        Tracker.findOneAndUpdate(
+        {email:req.params.email}, 
+         {$pull: {
+            box: { _id:{$eq:req.params.itemid}}
+         }}
+     ,{new: true,useFindAndModify:false}
+         )
+     
+     .then((m) => {
+         if (!m) {
+            console.log("error in patch");
+             return res.status(404).send();
+             
+         }
+         else{
+             res.send({newaddition:m});
+             console.log(" entry deleted from box >>>",m)
+         }
+         
+     }).catch((err) => {
+         res.status(500).send({err:err.message});
+         console.log("error in deleting entry from box !!!",err)
+     })
+})
+
 // -----------editing an item in box------------
 
 router.patch("/edit/:email/:itemid",auth,async(req,res)=>{
@@ -177,7 +209,6 @@ router.patch("/edit/:email/:itemid",auth,async(req,res)=>{
          console.log("error in adding new entry to box !!!",err)
      })
 })
-
 
 // ------------ADMIN access to all data-----------
 
