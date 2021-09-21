@@ -26,18 +26,7 @@ router.post("/signup",async(req,res)=>{
     console.log("After new SIGNUP >>>","\n",adduser);
     console.log(`password hash for the password'${adduser.password}'is >>> ${passwordHash}`)
    
-    if(req.body.admin){
-        const newuser = new Tracker({
 
-            name:adduser.name,
-            email:adduser.email,
-            passwordHash,
-            admin:true
-        });
-           const newaddition =await newuser.save();
-           res.send({newuser:newaddition});
-    }
-    else{
         const newuser = new Tracker({
 
             name:adduser.name,
@@ -47,7 +36,7 @@ router.post("/signup",async(req,res)=>{
         
             const newaddition =await newuser.save();
             res.send({newuser:newaddition});
-    }
+    
 }
 catch(err){
     res.send(err);
@@ -79,7 +68,7 @@ router.post("/login",async(req,res)=>{
         }
         const token=jwt.sign({id:userLoggingIn.id,email:userLoggingIn.email},"mysecretkey");
   
-        res.send({user:userLoggingIn.name,email:userLoggingIn.email,token,message:"login success"});
+        res.send({name:userLoggingIn.name,email:userLoggingIn.email,token,admin:userLoggingIn.admin,message:"login success"});
         console.log("---- successful login----");
       
       }
@@ -105,6 +94,7 @@ router.patch("/newentry/:email",auth,async(req,res)=>{
             division:req.body.division,
             category:req.body.category,
             amount: req.body.amount,
+            description:req.body.description,
             date: new Date(req.body.date)
          }}}
      ,{new: true}
@@ -223,8 +213,7 @@ router.get("/admin/:email",auth,async(req,res)=>{
        }
 
        const admindata=await Tracker.find().select(["-passwordHash"]);
-       res.send({admin:admindata});
-       res.status(200);
+       res.status(200).send({admin:admindata});
        
     }
     catch(err){
@@ -273,7 +262,9 @@ const secretKey= pwdrequester.passwordHash;
         from: 'one.trial.one.trial@gmail.com',
         to:pwdrequester.email ,
         subject: 'Password reset link from Bill Box',
-        html:`<h3>Verification Link from Bill Box</h3><p>${link}</p>`
+        html:`<h3>Verification Link from Bill Box</h3><p>${link}</p>
+        <p>Regards,<br>Team BillBox</p>`
+
       };
   
       transporter.sendMail(mailOptions, function(error, info){

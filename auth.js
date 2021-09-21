@@ -8,7 +8,7 @@ export const auth=(req,res,next)=>{
         jwt.verify(req.token,"mysecretkey",async(err,data)=>{
 
         if(err){
-            res.sendStatus(403)
+            res.status(403).send({msg:"forbidden"})
         }
         else{
             console.log("auth success !!!",data);
