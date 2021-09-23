@@ -66,7 +66,7 @@ router.post("/login",async(req,res)=>{
            return res.status(500);
           
         }
-        const token=jwt.sign({id:userLoggingIn._id,email:userLoggingIn.email},"mysecretkey");
+        const token=jwt.sign({id:userLoggingIn._id},"mysecretkey");
   
         res.send({name:userLoggingIn.name,email:userLoggingIn.email,token,admin:userLoggingIn.admin,message:"login success"});
         console.log("---- successful login----");
