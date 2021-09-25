@@ -178,6 +178,7 @@ router.patch("/edit/:email/:itemid",auth,async(req,res)=>{
             "box.$.division":req.body.division,
             "box.$.category":req.body.category,
             "box.$.amount": req.body.amount,
+            "box.$.description": req.body.description,
             "box.$.date": new Date(req.body.date)
          }}
      ,{new: true,useFindAndModify:false}
