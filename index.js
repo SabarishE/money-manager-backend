@@ -13,7 +13,7 @@ app.use(express.json());
 app.listen(PORT,console.log("server started"));
 
  const url= process.env.MONGODB_URI || "mongodb://localhost/trackerDB";
-// const url= "mongodb+srv://SabarishE:sabarishe@cluster0.eeimf.mongodb.net/trackerDB";
+
 mongoose.connect(url,{useNewUrlParser:true,useUnifiedTopology: true});
 
 const con=mongoose.connection;
