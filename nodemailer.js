@@ -3,10 +3,10 @@ import {google} from "googleapis"
 
 
 
-const client_id="543519367783-8rthmcbg05l5ue049mstkmb3qjjugk7e.apps.googleusercontent.com";
-const client_secret=process.env.secret ||"cxlJsDxELESfrVCyf0BLtk5j";
+const client_id="";
+const client_secret=process.env.secret;
 const redirect_uri="https://developers.google.com/oauthplayground";
-const refresh_token="1//04OLvrV3nPZATCgYIARAAGAQSNwF-L9IrZrYvlSliGMZCng3unBYjlF2BYPOcxCjfm8IGLcPVoVfvFvPdQOZWUOvEb7dD4bEYiG4";
+const refresh_token="";
 
 const oAuth2Client= new google.auth.OAuth2(client_id,client_secret,redirect_uri)
 
